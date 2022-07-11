@@ -5,6 +5,8 @@
 
 This is our final project for Advanced Statistics for Physics Analysis.
 
+***
+
 ### Bibliography
 
 - M. Scutari and J. B. Denis, Bayesian Networks, CRC Press, 2022, Taylor and Francis Group
