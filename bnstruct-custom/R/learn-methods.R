@@ -366,9 +366,7 @@ setMethod("learn.structure",
             scoring.func(bn) <- c("BDeu", "AIC", "BIC")[scoring.func + 1]
             
             
-            # 
-            # customization: include k2 in algorithm list
-            #
+            #   CUSTOM K2 - add to algorithm list
             algo <- tolower(algo)
             if (!algo %in% c("sm", "mmhc", "sem", "mmpc", "hc", "k2")) {
               bnstruct.log("structure learning algorithm not recognized, using MMHC")
@@ -636,17 +634,21 @@ setMethod("learn.structure",
             } # end if algo == mmhc
             
             
-            #   CUSTOMIZATION
+            #   CUSTOM K2
             if (algo == "k2")
             {
               bnstruct.start.log("learning the structure using (custom) K2 ...")
               
+              tic <- Sys.time()
+              
               # converting data to the format supported by our function
               dataset_k2 <- as_tibble( raw.data(dataset) )
-
+	      
+	      # execute the K2
               dag(bn) <- k2(dataset_k2, parents.nmax = max.parents)
               
-              bnstruct.end.log("learning using (custom) K2 completed.")
+              toc <- Sys.time()
+              bnstruct.end.log("learning using (custom) K2 completed (", round(toc - tic,3) ," s).")
             } # end if algo == k2
             
             
