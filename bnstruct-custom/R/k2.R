@@ -12,31 +12,31 @@ log.f <- function(node, parents, dataset) {
                             as_tibble() |>
                             filter(Freq > 0)
 
-    sum_over_x <- 1:(node.nunique - 1) |>
-                    log() |>
-                    sum()
+    A <- 1:(node.nunique - 1) |>
+            log() |>
+            sum()
 
-    sum_over_y <- contingency_table |>
-                    rowwise() |>
-                    mutate(Freq = ((1:Freq) |> log() |> sum())) |>
-                    ungroup() |>
-                    group_by_at(parents) |>
-                    summarise(Freq = sum(Freq), .groups='drop_last') |>
-                    ungroup() |>
-                    select(Freq) |>
-                    deframe()
+    B <- contingency_table |>
+            rowwise() |>
+            mutate(Freq = ((1:Freq) |> log() |> sum())) |>
+            ungroup() |>
+            group_by_at(parents) |>
+            summarise(Freq = sum(Freq), .groups='drop_last') |>
+            ungroup() |>
+            select(Freq) |>
+            deframe()
 
-    sum_over_z <- contingency_table |>
-                    group_by_at(parents) |>
-                    summarise(Freq = sum(Freq), .groups='drop_last') |>
-                    ungroup() |>
-                    rowwise() |>
-                    mutate(Freq = ((1:(Freq + node.nunique - 1)) |> log() |> sum())) |>
-                    ungroup() |>
-                    select(Freq) |>
-                    deframe()
+    C <- contingency_table |>
+            group_by_at(parents) |>
+            summarise(Freq = sum(Freq), .groups='drop_last') |>
+            ungroup() |>
+            rowwise() |>
+            mutate(Freq = ((1:(Freq + node.nunique - 1)) |> log() |> sum())) |>
+            ungroup() |>
+            select(Freq) |>
+            deframe()
 
-    dataset.log.prob <- sum(sum_over_x + sum_over_y - sum_over_z)
+    dataset.log.prob <- sum(A + B - C)
     
     return(dataset.log.prob)
 
@@ -45,10 +45,10 @@ log.f <- function(node, parents, dataset) {
 
 k2 <- function(dataset, parents.nmax, f = log.f) {
         
-        
         #####################
         ##  PREPROCESSING  ##
         #####################
+        
         # Since bnstruct uses custom objects, we do some stuff to use
         #  our function in this environment.
         nodes <- names(dataset)
@@ -66,53 +66,49 @@ k2 <- function(dataset, parents.nmax, f = log.f) {
         ####################
         ##  K2 ALGORITHM  ##
         ####################
-        
-        tic <- Sys.time()
 
-        #dag <- empty.graph(nodes=nodes)
         for (i in 2:length(nodes)) {
-            
-            # select current node & all the previous
-            node <- nodes[i]
-            node.previous <- nodes[1:i-1]
-            
-            parents <- c()
-            P_old <- f(node, parents, dataset)
 
-            proceed <- ifelse(length(node.previous) > 0, T, F)
+            node           <- nodes[i]                  # current node
+            previous.nodes <- nodes[1:(i-1)]            # nodes that precede the current node
+            parents        <- c()                       # parents of the current node
+            P_old          <- f(node, parents, dataset) # old probability
+            proceed        <- T
             
             while (proceed & (length(parents) < parents.nmax)) {
 
-                candidates <- setdiff(node.previous, parents)
-
-                P_new <- P_old
+                candidates <- setdiff(previous.nodes, parents) # candidate parents of the current node 
+                P_new      <- P_old                            # new probability
 
                 for (candidate in candidates) {
-                    score <- f(node, c(parents, candidate), dataset)
-                    if (score > P_new) {
-                        candidates.best <- candidate
-                        P_new <- score
+
+                    candidate.score <- f(node, c(parents, candidate), dataset) # candidate parent score
+
+                    if (candidate.score > P_new) {
+
+                        candidates.best <- candidate       # best candidate parent
+                        P_new           <- candidate.score
+
                     }
+
                 }
 
                 if (P_new > P_old) {
-                    P_old <- P_new
+
+                    P_old   <- P_new
                     parents <- c(parents, candidates.best)
-                    #dag <- set.arc(dag, from=candidates.best, to=node)
-                    adjm[ candidate.idx[candidates.best], i] <- 1 # set the arc in matrix
+                    #net.dag <- set.arc(net.dag, from=candidates.best, to=node)
+                    adjm[ candidate.idx[candidates.best], i] <- 1  # set the arc
+
                 } else {
-                    proceed = F
+
+                    proceed <- F
+
                 }
 
             }
 
-            #cat('Node:', node, '| Parents:', parents, '\n')
-
         }
-
-        toc <- Sys.time()
-
-        cat('Execution time:', toc - tic, 's')
-
-        return(adjm)
+        
+	return(adjm)
 }

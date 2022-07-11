@@ -3,7 +3,6 @@ hc <- function( data, node.sizes, scoring.func = 0, cpc, cont.nodes = c(), ess =
                 init.net = NULL, wm.max=15, layering=NULL, layer.struct=NULL,
                 mandatory.edges = NULL )
 {
-  cat('HELLO THERE!')
   n.nodes <- ncol(data)
   n.cases <- nrow(data)
 
