@@ -4,3 +4,5 @@
 
 # remove tmp folders
 **/tmp/
+
+.Rhistory
