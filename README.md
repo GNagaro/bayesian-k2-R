@@ -1,4 +1,4 @@
-# bayesian-K2-R
+# The K2 algorithm in R
 
 <p align="center"><b>Group members</b> // Barone, Nagaro, Ninni<br>
 </p>
