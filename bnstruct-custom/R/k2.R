@@ -1,3 +1,14 @@
+################################################################################
+#  Advanced Statistics for Physical Analysis // University of Padua, AY 2021/22
+#  Group: Barone Nagaro Ninni
+#
+#    K2 algorithm implementation in bnstruct
+#
+#  last edit: 17 July 2022
+#-------------------------------------------------------------------------------
+#  under GPL-3.0 licence
+#-------------------------------------------------------------------------------
+
 library(tidyverse)
 
 log.f <- function(node, parents, dataset) {
